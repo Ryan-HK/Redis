@@ -1,4 +1,4 @@
-package pratice.redis.service;
+package pratice.redis.service.lock;
 
 
 import org.springframework.stereotype.Service;
@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import pratice.redis.domain.Stock;
 import pratice.redis.repository.StockRepository;
-import pratice.redis.service.facade.OptimisticLockStockFacade;
 
 @Service
 public class StockService {
@@ -74,8 +73,8 @@ public class StockService {
     //[해결책 3] : DB락 OptimisticLock 사용하기
     //-. Entity에 version 필드를 추가해줘야 한다. (@Version)
     //성능문제 + 데드락 가능성에 대해 자유로워 질 수 있었다.
-    //[단점]
-    //1. 실패에 대한 로직을 추가로 작성해줘야 한다.
+    //[특징]
+    //1. 실패에 대한 로직을 추가로 작성해줘야 한다. -> @Transactional을 유지해줘야 하기 때문에 별도의 Facade 클래스가 필요하다.
     //2. 충돌이 빈번하게 발생되는 로직에서는 성능상 문제가 발생한다.
     @Transactional
     public void decreaseV4(Long id, long quantity) throws InterruptedException {
@@ -93,10 +92,11 @@ public class StockService {
     //-. 내가 원하는 정산 로직전체에 락을 걸 수 있다.
     //부모클래스와는 별도의 트랜잭션을 사용해야하기 때문에 REQUIRES_NEW 전파 옵션을 사용한다.
     //-. 별도의 트랜잭션을 가진다.
-    //[단점]
-    //1. 실패에 대한 로직을 추가로 작성해줘야 한다.
-    //2. DB커넥션을 점유하기 때문에, 다른 서비스에 영향을 끼칠 수 있다.
-    //3. 해당 방법을 사용하기 보다는 Redis를 이용한 분산락을 사용하는 것이 더욱 바람직한것으로 보인다.
+    //[특징]
+    //1. DB 락을 get하고 release 하는 로직이 추가되어야 한다. -> 별도의 트랜잭션을 유지하기 위해 Propagetion 이 필요하다.
+    //2. 해당 락을 사용하려면 별도의 DB를 사용해야 한다. (커넥션 문제)
+    //3. DB커넥션을 점유하기 때문에, 다른 서비스에 영향을 끼칠 수 있다.
+    //4. 해당 방법을 사용하기 보다는 Redis를 이용한 분산락을 사용하는 것이 더욱 바람직한것으로 보인다.
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void decreaseV5(Long id, long quantity)  {
         // Stock 조회

@@ -14,6 +14,11 @@ spring:
     hikari:
       maximum-pool-size: 40
 
+  data:
+    redis:
+      host: localhost
+      port: 4001
+
 logging:
   level:
     org:

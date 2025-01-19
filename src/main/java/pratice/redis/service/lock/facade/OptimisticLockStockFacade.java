@@ -1,11 +1,8 @@
-package pratice.redis.service.facade;
+package pratice.redis.service.lock.facade;
 
 
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import pratice.redis.domain.Stock;
-import pratice.redis.repository.StockRepository;
-import pratice.redis.service.StockService;
+import pratice.redis.service.lock.StockService;
 
 @Component
 public class OptimisticLockStockFacade {
