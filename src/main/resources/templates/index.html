@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello World</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+  <h1>안녕하세요 여기는 알람메시지 테스트 공간 입니다.</h1>
+  <div style="color: red; font-weight: bold" id="notifications">알람메시지 뜨는 공간</div>
+
+  <script>
+      const socket = new SockJS('/stomp-endpoint');
+      const stompClient = Stomp.over(socket);
+
+      stompClient.connect({}, function(frame) {
+          console.log('>>> Connected: ' + frame);
+
+          // Notifications topic 구독
+          stompClient.subscribe('/topic/alarm', function(response) {
+              const notifications = document.getElementById("notifications");
+              const newNotification = document.createElement("li");
+              newNotification.textContent = response.body;
+              notifications.appendChild(newNotification);
+          });
+      });
+  </script>
+</body>
+</html>
